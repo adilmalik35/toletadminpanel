@@ -41,18 +41,31 @@ class _PropertiesTabState extends State<PropertiesTab>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: "Verified"),
-            Tab(text: "Unverified"),
-          ],
-          indicatorColor: Color(0xFF192747),  // Custom tab indicator color
-          labelColor: Color(0xFF192747),  // Active tab text color
-          unselectedLabelColor: Colors.grey,  // Inactive tab text color
-          indicatorWeight: 3.0,  // Indicator line thickness
+      TabBar(
+      controller: _tabController,
+      tabs: [
+        Tab(
+          icon: Image.asset(
+            'assets/icons/verified.png',
+            height: 24, // Adjust icon size as needed
+          ),
+          text: "Verified",
         ),
-        Expanded(
+        Tab(
+          icon: Image.asset(
+            'assets/icons/unverified.png',
+            height: 24, // Adjust icon size as needed
+          ),
+          text: "Unverified",
+        ),
+      ],
+      indicatorColor: Color(0xFF192747),  // Custom tab indicator color
+      labelColor: Color(0xFF192747),  // Active tab text color
+      unselectedLabelColor: Colors.grey,  // Inactive tab text color
+      indicatorWeight: 3.0,  // Indicator line thickness
+    ),
+
+    Expanded(
           child: TabBarView(
             controller: _tabController,
             children: [

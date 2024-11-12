@@ -146,28 +146,35 @@ class _NewInvitesTabState extends State<NewInvitesTab> {
                       Spacer(),
                       // Verify and Unverify buttons
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers the buttons and minimizes space between
                         children: [
                           ElevatedButton(
                             onPressed: () {
                               // Handle verify logic here
                               print("Verified invite ID: ${invite['id']}");
                             },
-                            child: Text("Verify"),
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green),
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12), // Increase padding
+                            ),
+                            child: Text("Verify"),
                           ),
+                          SizedBox(width: 8), // Space between buttons
                           ElevatedButton(
                             onPressed: () {
                               // Handle unverify logic here
                               print("Unverified invite ID: ${invite['id']}");
                             },
-                            child: Text("Unverify"),
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red),
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(horizontal: 27, vertical: 12), // Increase padding
+                            ),
+                            child: Text("Unverify"),
                           ),
                         ],
-                      ),
+                      )
                     ],
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toletadminpanel/settingScreen.dart';
 import 'NewInvitesTab.dart';  // Make sure these imports are correct
 import 'PropertiesTab.dart';  // Make sure these imports are correct
 
@@ -12,6 +13,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _tabs = [
     NewInvitesTab(),
     PropertiesTab(),
+    Settingscreen(),
   ];
 
   @override
@@ -47,6 +49,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: _currentIndex == 1 ? Colors.white : Color(0xFF8E8E93), // Icon color change
             ),
             label: "Properties",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.settings,
+              color: _currentIndex == 2 ? Colors.white : Color(0xFF8E8E93), // Icon color change
+            ),
+            label: "Settings",
           ),
         ],
         selectedItemColor: Colors.white, // Selected item text and icon color
