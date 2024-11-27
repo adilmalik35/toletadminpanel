@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:toletadminpanel/splashScreen.dart';
 
-// import 'firebase_options.dart';
+import 'firebase_options.dart';
 
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(MyApp());
 }
