@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 class CustomizedButton extends StatelessWidget {
-  String title;
-  Color colorButton;
-  double height;
-  double widht;
-  Color colorText;
-  double fontSize;
+  final String title;
+  final Color colorButton;
+  final double height;
+  final double widht;
+  final Color colorText;
+  final double fontSize;
+  final VoidCallback? onPressed; // Add onPressed property
 
   CustomizedButton({
     Key? key,
@@ -16,23 +17,31 @@ class CustomizedButton extends StatelessWidget {
     required this.widht,
     required this.colorText,
     required this.fontSize,
+    this.onPressed, // Make it optional
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      width: widht,
-      decoration: BoxDecoration(
-        color: colorButton,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Center(
+    return GestureDetector(
+      onTap: onPressed, // Trigger the callback when tapped
+      child: Container(
+        height: height,
+        width: widht,
+        decoration: BoxDecoration(
+          color: colorButton,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
           child: Text(
             title,
             style: TextStyle(
-                color: colorText, fontWeight: FontWeight.bold, fontSize: fontSize),
-          )),
+              color: colorText,
+              fontWeight: FontWeight.bold,
+              fontSize: fontSize,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

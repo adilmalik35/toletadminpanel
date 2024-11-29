@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -132,8 +133,23 @@ class _SettingscreenState extends State<Settingscreen> {
                   colorText: Colors.white,
                   fontSize: screenWidth * 0.05, // Responsive button text size
                   height: screenHeight * 0.07, // Responsive button height
-                  title: 'logout',
+                  title: 'Logout', // Button title
                   widht: screenWidth * 0.60, // Responsive button width
+                  onPressed: () async {
+                    try {
+                      // Sign out from Firebase
+                      await FirebaseAuth.instance.signOut();
+
+                      // Clear all shared preferences
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+
+                      // Navigate to the SplashScreen
+                      Get.offAll(() => SplashScreen(), transition: Transition.fadeIn);
+                    } catch (e) {
+                      print("Error signing out: $e");
+                    }
+                  },
                 ),
               ),
             ),

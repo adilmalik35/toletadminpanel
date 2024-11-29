@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'DashboardScreen.dart';
-
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,10 +15,87 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _isObscureText = true;
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  bool _isobsecureText = true;
   bool isLoading = false;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _login() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+      try {
+        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim());
+
+        String uid = userCredential.user!.uid;
+
+        DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+        if (userDoc.exists) {
+          Map<String, dynamic> userData =
+          userDoc.data() as Map<String, dynamic>;
+          String userType = userData['userType'];
+
+          // Save userType and login state to SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+          await prefs.setString('userType', userType);
+
+          if (userType == 'Tenant') {
+            Navigator.pop(context);
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => DashboardScreen()));
+            //Get.to(() => tenantDashboard(), transition: Transition.fade);
+          } else if (userType == 'Landlord') {
+            Navigator.pop(context);
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => DashboardScreen()));
+            //Get.to(() => ownerDashboard(), transition: Transition.fade);
+          } else {
+            Fluttertoast.showToast(
+                msg: 'Unknown user role', backgroundColor: Colors.red);
+          }
+        } else {
+          Fluttertoast.showToast(
+              msg: 'User data not found in Firestore',
+              backgroundColor: Colors.red);
+        }
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'user-not-found') {
+          Fluttertoast.showToast(
+              msg: 'No user found for that email.',
+              backgroundColor: Colors.red);
+        } else if (e.code == 'wrong-password') {
+          Fluttertoast.showToast(
+              msg: 'Wrong password provided.', backgroundColor: Colors.red);
+        } else {
+          Fluttertoast.showToast(
+              msg: 'An error occurred. Please try again.',
+              backgroundColor: Colors.red);
+        }
+      } catch (e) {
+        Fluttertoast.showToast(
+            msg: 'Something went wrong. Please try again.',
+            backgroundColor: Colors.red);
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+  String? _passwordValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter password';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,30 +172,35 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(height: screenHeight * 0.01),
                     TextFormField(
                       controller: _passwordController,
-                      obscureText: _isObscureText,
+                      validator: _passwordValidator,
+                      obscureText: _isobsecureText,
                       decoration: InputDecoration(
                         hintText: '******',
                         suffixIcon: IconButton(
-                          icon: Icon(_isObscureText ? Icons.visibility_off : Icons.visibility),
                           onPressed: () {
                             setState(() {
-                              _isObscureText = !_isObscureText;
+                              _isobsecureText = !_isobsecureText;
                             });
                           },
+                          icon: Icon(
+                            _isobsecureText
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
                         ),
                         filled: true,
-                        fillColor: Color(0xFFF2F3F3),
-                        border: OutlineInputBorder(
+                        fillColor: Color(0xfff2f3f3),
+                        contentPadding:
+                        EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-                        return null;
-                      },
                     ),
                   ],
                 ),
@@ -128,9 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: isLoading
                     ? CircularProgressIndicator(color: Color(0xFF192747)) // Loading spinner color
                     : ElevatedButton(
-                  onPressed: () {
-                    Get.off(() => DashboardScreen());
-                  },
+                  onPressed: _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF192747), // Button background color
                     padding: EdgeInsets.symmetric(
