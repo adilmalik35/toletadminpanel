@@ -1,7 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class NewInvitesTab extends StatefulWidget {
   @override
@@ -14,42 +12,77 @@ class _NewInvitesTabState extends State<NewInvitesTab> {
   @override
   void initState() {
     super.initState();
-    _fetchNewInvites(); // Fetch your invites data here
+    _fetchNewInvites(); // Fetch unverified invites
   }
 
+  /// Fetch unverified invites from Firestore
   Future<void> _fetchNewInvites() async {
-    // Simulate fetching data
-    // Replace this with your actual data fetching logic
-    newInvites = [
-      {
-        'propertyTitle': 'Invite Property 1',
-        'location': 'Location 1',
-        'price': '1000',
-        'area': '50',
-        'bhk': '2 BHK',
-        'owner': 'Owner X',
-        'id': '101',
-        'imageURLs': ['https://via.placeholder.com/150']
-      },
-      {
-        'propertyTitle': 'Invite Property 2',
-        'location': 'Location 2',
-        'price': '1200',
-        'area': '60',
-        'bhk': '3 BHK',
-        'owner': 'Owner Y',
-        'id': '102',
-        'imageURLs': ['https://via.placeholder.com/150']
-      },
-    ];
-    setState(() {});
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('propertiesAll')
+          .where('isVerified', isEqualTo: false)
+          .get();
+
+      setState(() {
+        newInvites = querySnapshot.docs.map((doc) {
+          return {
+            ...doc.data() as Map<String, dynamic>,
+            'id': doc.id, // Include document ID
+          };
+        }).toList();
+      });
+    } catch (e) {
+      print('Error fetching new invites: $e');
+    }
   }
 
+  /// Update Firestore database and remove the item locally
+  Future<void> _markAsVerified(String propertyId) async {
+    try {
+      // Update the Firestore document
+      await FirebaseFirestore.instance
+          .collection('propertiesAll')
+          .doc(propertyId)
+          .update({'isVerified': true});
+
+      // Remove the property from the local list
+      setState(() {
+        newInvites.removeWhere((invite) => invite['id'] == propertyId);
+      });
+
+      print('Property with ID $propertyId marked as verified.');
+    } catch (e) {
+      print('Error verifying property: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('New Invites'),
+      ),
+      body: newInvites.isEmpty
+          ? Center(
+        child: Text(
+          "No unverified properties available.",
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      )
+          : ListView.builder(
+        itemCount: newInvites.length,
+        itemBuilder: (context, index) {
+          return buildInviteCard(context, newInvites[index]);
+        },
+      ),
+    );
+  }
+
+  /// Build a card for each invite
   Widget buildInviteCard(BuildContext context, Map<String, dynamic> invite) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double cardWidth = screenWidth < 450 ? screenWidth * 0.9 : screenWidth * 0.9;
+    double cardWidth = screenWidth * 0.9;
     double cardHeight = 180;
-    double imageWidth = screenWidth * 0.3;
     double iconSize = 22.0;
 
     return Padding(
@@ -68,7 +101,6 @@ class _NewInvitesTabState extends State<NewInvitesTab> {
           height: cardHeight,
           width: cardWidth,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Property image
@@ -77,41 +109,45 @@ class _NewInvitesTabState extends State<NewInvitesTab> {
                   topLeft: Radius.circular(15),
                   bottomLeft: Radius.circular(15),
                 ),
-                child: invite['imageURLs'] != null
+                child: invite['imageURLs'] != null &&
+                    invite['imageURLs'] is List &&
+                    invite['imageURLs'].isNotEmpty
                     ? Image.network(
                   invite['imageURLs'][0],
                   fit: BoxFit.cover,
-                  height: cardHeight,
-                  width: imageWidth,
+                  width: screenWidth * 0.3,
                 )
-                    : Image.asset(
-                  'assets/icons/wifi.png',
-                  fit: BoxFit.cover,
-                  height: cardHeight,
-                  width: imageWidth,
+                    : Container(
+                  width: screenWidth * 0.3,
+                  color: Colors.grey[300],
+                  child: Icon(
+                    Icons.image_not_supported,
+                    color: Colors.grey[600],
+                  ),
                 ),
               ),
               // Property details
               SizedBox(width: 8),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 10, horizontal: 8),
+                  padding: const EdgeInsets.all(10.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Title
                       Text(
-                        invite['propertyTitle'] ?? 'No Title',
+                        invite['title'] ?? 'No title available',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 4),
                       // Location
                       Text(
-                        invite['location'] ?? 'Unknown Location',
+                        invite['location'] ?? 'No location available',
                         style: TextStyle(
                           color: Color(0xff7d7f88),
                           fontSize: 14,
@@ -122,54 +158,49 @@ class _NewInvitesTabState extends State<NewInvitesTab> {
                       Row(
                         children: [
                           Icon(Icons.bed,
-                              color: Color(0xff7d7f88), size: iconSize),
+                              size: iconSize, color: Color(0xff7d7f88)),
                           SizedBox(width: 4),
-                          Text(
-                            '${invite['bhk']}',
-                            style: TextStyle(color: Color(0xff7d7f88)),
-                          ),
+                          Text(invite['bhk'] ?? 'N/A'),
                           SizedBox(width: 8),
                           Icon(Icons.square_foot,
-                              color: Color(0xff7d7f88), size: iconSize),
+                              size: iconSize, color: Color(0xff7d7f88)),
                           SizedBox(width: 4),
-                          Text(
-                            '${invite['area'] ?? 'Unknown Area'} m²',
-                            style: TextStyle(color: Color(0xff7d7f88)),
-                          ),
+                          Text(invite['area'] ?? 'N/A'),
                         ],
                       ),
+                      SizedBox(height: 4),
+                      // Price
                       Text(
-                        '${invite['price']} / month',
+                        '₹${invite['price'] ?? "0"} / month',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                       Spacer(),
                       // Verify and Unverify buttons
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers the buttons and minimizes space between
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ElevatedButton(
-                            onPressed: () {
-                              // Handle verify logic here
-                              print("Verified invite ID: ${invite['id']}");
+                            onPressed: () async {
+                              await _markAsVerified(invite['id']);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12), // Increase padding
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 30, vertical: 12),
                             ),
                             child: Text("Verify"),
                           ),
-                          SizedBox(width: 8), // Space between buttons
                           ElevatedButton(
                             onPressed: () {
-                              // Handle unverify logic here
                               print("Unverified invite ID: ${invite['id']}");
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(horizontal: 27, vertical: 12), // Increase padding
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 27, vertical: 12),
                             ),
                             child: Text("Unverify"),
                           ),
@@ -183,16 +214,6 @@ class _NewInvitesTabState extends State<NewInvitesTab> {
           ),
         ),
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: newInvites.length,
-      itemBuilder: (context, index) {
-        return buildInviteCard(context, newInvites[index]);
-      },
     );
   }
 }
