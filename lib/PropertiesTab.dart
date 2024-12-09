@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class PropertiesTab extends StatefulWidget {
@@ -21,9 +22,13 @@ class _PropertiesTabState extends State<PropertiesTab>
 
   Future<void> _fetchProperties() async {
     try {
+      final String userId = FirebaseAuth.instance.currentUser!.uid;
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('propertiesAll')
+          .collection('Users') // Main 'Users' collection
+          .doc(userId) // Reference to the logged-in user's document
+          .collection('properties') // Subcollection under the user// Query condition
           .get();
+
 
       print('Fetched ${querySnapshot.docs.length} documents');
 
