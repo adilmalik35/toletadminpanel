@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "381700652858",
+    "project_id": "tolet-b666d",
+    "storage_bucket": "tolet-b666d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381700652858:android:4517b399743ff702c95a03",
+        "android_client_info": {
+          "package_name": "com.example.toletadminpanel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAh-0n5N5hPhJZmY7DTN0BSNie2Mqsdy50"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381700652858:android:8dd87608665e750dc95a03",
+        "android_client_info": {
+          "package_name": "com.tolet.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAh-0n5N5hPhJZmY7DTN0BSNie2Mqsdy50"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
