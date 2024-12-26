@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toletadminpanel/settingScreen.dart';
-import 'NewInvitesTab.dart';  // Make sure these imports are correct
-import 'PropertiesTab.dart';  // Make sure these imports are correct
+import 'NewInvitesTab.dart'; // Make sure these imports are correct
+import 'PropertiesTab.dart'; // Make sure these imports are correct
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -39,21 +39,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(
             icon: Icon(
               Icons.mail_outline,
-              color: _currentIndex == 0 ? Colors.white : Color(0xFF8E8E93), // Icon color change
+              color: _currentIndex == 0
+                  ? Colors.white
+                  : Color(0xFF8E8E93), // Icon color change
             ),
-            label: "New Invites",
+            label: "Verification",
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.home_outlined,
-              color: _currentIndex == 1 ? Colors.white : Color(0xFF8E8E93), // Icon color change
+              color: _currentIndex == 1
+                  ? Colors.white
+                  : Color(0xFF8E8E93), // Icon color change
             ),
             label: "Properties",
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.settings,
-              color: _currentIndex == 2 ? Colors.white : Color(0xFF8E8E93), // Icon color change
+              color: _currentIndex == 2
+                  ? Colors.white
+                  : Color(0xFF8E8E93), // Icon color change
             ),
             label: "Settings",
           ),
